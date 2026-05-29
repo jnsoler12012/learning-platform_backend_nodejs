@@ -1,0 +1,19 @@
+{
+  "name": "learning-platform-v3",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "pnpm": {
+    "onlyBuiltDependencies": ["@prisma/client", "prisma"]
+  },
+  "scripts": {
+    "dev": "pnpm --filter @platform/auth dev",
+    "start": "pnpm --filter @platform/auth start",
+    "test": "pnpm --filter @platform/auth test",
+    "test:verbose": "pnpm --filter @platform/auth test:verbose",
+    "db:generate": "pnpm --filter @platform/auth db:generate",
+    "db:push": "pnpm --filter @platform/auth db:push",
+    "db:seed": "pnpm --filter @platform/auth db:seed",
+    "db:migrate": "pnpm --filter @platform/auth db:migrate"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "@platform/shared",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./errors/AppError.js": "./src/errors/AppError.js",
+    "./errors/errorCodes.js": "./src/errors/errorCodes.js",
+    "./security/jwt.service.js": "./src/security/jwt.service.js",
+    "./security/auth.middleware.js": "./src/security/auth.middleware.js",
+    "./security/rbac.middleware.js": "./src/security/rbac.middleware.js"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1"
+  }
+}
