@@ -1,0 +1,24 @@
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import express from 'express';
+import cors from 'cors';
+import routes from './presentation/routes/index.js';
+import { errorHandler } from './presentation/middlewares/errorHandler.middleware.js';
+
+const app = express();
+
+app.use(cors({ origin: '*', methods: ['GET', 'POST', 'PATCH', 'DELETE'], allowedHeaders: ['Content-Type', 'Authorization'] }));
+app.use(express.json());
+
+// Mounts all API routes under /api/v1
+app.use('/api/v1', routes);
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', service: 'knowledge-service' });
+});
+
+// Global error handler
+app.use(errorHandler);
+
+export default app;

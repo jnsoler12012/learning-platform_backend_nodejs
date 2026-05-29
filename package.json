@@ -7,10 +7,10 @@
     "onlyBuiltDependencies": ["@prisma/client", "prisma"]
   },
   "scripts": {
-    "dev": "pnpm --filter @platform/auth dev",
+    "dev": "pnpm --parallel --filter @platform/auth --filter @platform/knowledge dev",
+    "dev:knowledge": "pnpm --filter @platform/knowledge dev",
     "start": "pnpm --filter @platform/auth start",
     "test": "pnpm --filter @platform/auth test",
-    "test:verbose": "pnpm --filter @platform/auth test:verbose",
     "db:generate": "pnpm --filter @platform/auth db:generate",
     "db:push": "pnpm --filter @platform/auth db:push",
     "db:seed": "pnpm --filter @platform/auth db:seed",
