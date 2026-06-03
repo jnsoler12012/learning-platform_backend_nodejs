@@ -8,7 +8,9 @@
     "./errors/errorCodes.js": "./src/errors/errorCodes.js",
     "./security/jwt.service.js": "./src/security/jwt.service.js",
     "./security/auth.middleware.js": "./src/security/auth.middleware.js",
-    "./security/rbac.middleware.js": "./src/security/rbac.middleware.js"
+    "./security/rbac.middleware.js": "./src/security/rbac.middleware.js",
+    "./storage/upload.service.js": "./src/storage/upload.service.js",
+    "./storage/upload.middleware.js": "./src/storage/upload.middleware.js"
   },
   "dependencies": {
     "jsonwebtoken": "^9.0.2",
