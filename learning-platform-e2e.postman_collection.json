@@ -1,0 +1,1173 @@
+{
+  "info": {
+    "name": "Learning Platform — End-to-End Validation",
+    "description": "Single collection that validates all student-accessible endpoints across the Auth (8080), Knowledge (8081), and Content (8082) services. Registers a new user and walks through a complete learning journey: auth, profile, navigation, enrollment, content reading, assessments, notes, and search. Cleans up all created resources at the end.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{user_token}}", "type": "string" }
+    ]
+  },
+  "variable": [
+    { "key": "auth_url", "value": "http://localhost:8080/api/v1", "type": "string" },
+    { "key": "knowledge_url", "value": "http://localhost:8081/api/v1", "type": "string" },
+    { "key": "content_url", "value": "http://localhost:8082/api/v1", "type": "string" },
+    { "key": "user_token", "value": "", "type": "string" },
+    { "key": "userId", "value": "", "type": "string" },
+    { "key": "user_email", "value": "testuser@test.com", "type": "string" },
+    { "key": "user_password", "value": "Test@123", "type": "string" },
+    { "key": "learning_path_id", "value": "", "type": "string" },
+    { "key": "assessment_id", "value": "6a20ada0408e222820b34d5e", "type": "string" },
+    { "key": "nodeId", "value": "CN10", "type": "string" },
+    { "key": "track_name", "value": "Mathematics", "type": "string" },
+    { "key": "subtrack_name", "value": "Core Algebraic Spine", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "RF1 — Registration and Authentication",
+      "item": [
+        {
+          "name": "US-01: User registers a new account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 — User created\", function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"Response has token\", function () {",
+                  "  pm.expect(body).to.have.property(\"token\");",
+                  "});",
+                  "pm.test(\"Response has user.id\", function () {",
+                  "  pm.expect(body.user).to.have.property(\"id\");",
+                  "});",
+                  "",
+                  "pm.collectionVariables.set(\"user_token\", body.token);",
+                  "pm.collectionVariables.set(\"userId\", body.user.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{user_email}}\",\n  \"password\": \"{{user_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_url}}/auth/register",
+              "host": ["{{auth_url}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "US-02: User logs in with correct credentials",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 — Login successful\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"Response has token\", function () {",
+                  "  pm.expect(body).to.have.property(\"token\");",
+                  "});",
+                  "",
+                  "pm.collectionVariables.set(\"user_token\", body.token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{user_email}}\",\n  \"password\": \"{{user_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_url}}/auth/login",
+              "host": ["{{auth_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "US-03: Duplicate registration is rejected",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 409 — Duplicate rejected\", function () {",
+                  "  pm.response.to.have.status(409);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"Error code is CONFLICT\", function () {",
+                  "  pm.expect(body.error.code).to.eql(\"CONFLICT\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{user_email}}\",\n  \"password\": \"{{user_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_url}}/auth/register",
+              "host": ["{{auth_url}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "US-04: User updates account password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 — Account updated\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"Success message returned\", function () {",
+                  "  pm.expect(body).to.have.property(\"message\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"Test@123\",\n  \"newPassword\": \"NewPass@456\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_url}}/users/me/account",
+              "host": ["{{auth_url}}"],
+              "path": ["users", "me", "account"]
+            }
+          }
+        },
+        {
+          "name": "US-05: Login with wrong password returns 401",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 401 — Unauthorized\", function () {",
+                  "  pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"Error code is UNAUTHORIZED\", function () {",
+                  "  pm.expect(body.error.code).to.eql(\"UNAUTHORIZED\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{user_email}}\",\n  \"password\": \"wrong-password\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_url}}/auth/login",
+              "host": ["{{auth_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "RF2 — Profile and Learning Objectives",
+      "item": [
+        {
+          "name": "US-06: User views their own profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"Response has user\", function () {",
+                  "  pm.expect(body).to.have.property(\"user\");",
+                  "});",
+                  "pm.test(\"Response has profile\", function () {",
+                  "  pm.expect(body).to.have.property(\"profile\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{auth_url}}/users/me",
+              "host": ["{{auth_url}}"],
+              "path": ["users", "me"]
+            }
+          }
+        },
+        {
+          "name": "US-07: User updates their profile display name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"displayName was updated\", function () {",
+                  "  pm.expect(body.displayName).to.eql(\"Test User\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"displayName\": \"Test User\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_url}}/users/me",
+              "host": ["{{auth_url}}"],
+              "path": ["users", "me"]
+            }
+          }
+        },
+        {
+          "name": "US-08: User lists available learning paths",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"Response is array\", function () {",
+                  "  pm.expect(body).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "if (body.length > 0) {",
+                  "  pm.collectionVariables.set(\"learning_path_id\", body[0].id);",
+                  "  console.log(\"Stored learning_path_id:\", body[0].id);",
+                  "} else {",
+                  "  console.warn(\"No learning paths found — enrollment tests may fail\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{auth_url}}/learning-paths",
+              "host": ["{{auth_url}}"],
+              "path": ["learning-paths"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "RF3 — Navigation by Topics and Knowledge Nodes",
+      "item": [
+        {
+          "name": "US-09: User lists all concepts filtered by track",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"Response is array\", function () {",
+                  "  pm.expect(body).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{knowledge_url}}/concepts?track={{track_name}}",
+              "host": ["{{knowledge_url}}"],
+              "path": ["concepts"],
+              "query": [
+                { "key": "track", "value": "{{track_name}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "US-10: User gets concept detail with relationships",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"Has prerequisites\", function () {",
+                  "  pm.expect(body).to.have.property(\"prerequisites\");",
+                  "});",
+                  "pm.test(\"Has dependents\", function () {",
+                  "  pm.expect(body).to.have.property(\"dependents\");",
+                  "});",
+                  "pm.test(\"Has related\", function () {",
+                  "  pm.expect(body).to.have.property(\"related\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{knowledge_url}}/concepts/CN11",
+              "host": ["{{knowledge_url}}"],
+              "path": ["concepts", "CN11"]
+            }
+          }
+        },
+        {
+          "name": "US-11: User views the full knowledge graph",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"Has nodes\", function () {",
+                  "  pm.expect(body).to.have.property(\"nodes\");",
+                  "});",
+                  "pm.test(\"Has edges\", function () {",
+                  "  pm.expect(body).to.have.property(\"edges\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{knowledge_url}}/concepts/graph",
+              "host": ["{{knowledge_url}}"],
+              "path": ["concepts", "graph"]
+            }
+          }
+        },
+        {
+          "name": "US-12: User views knowledge graph filtered by track",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"Has nodes\", function () {",
+                  "  pm.expect(body).to.have.property(\"nodes\");",
+                  "});",
+                  "pm.test(\"Has edges\", function () {",
+                  "  pm.expect(body).to.have.property(\"edges\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{knowledge_url}}/concepts/graph/track/{{track_name}}",
+              "host": ["{{knowledge_url}}"],
+              "path": ["concepts", "graph", "track", "{{track_name}}"]
+            }
+          }
+        },
+        {
+          "name": "US-13: User finds shortest prerequisite path between concepts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 — Path found\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"Path has nodes\", function () {",
+                  "  pm.expect(body.nodes.length).to.be.greaterThan(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{knowledge_url}}/concepts/graph/path/CN01/CN11",
+              "host": ["{{knowledge_url}}"],
+              "path": ["concepts", "graph", "path", "CN01", "CN11"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "RF4 — Learning Pathways and Progression Control",
+      "item": [
+        {
+          "name": "US-14: User enrolls in a learning path",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 — Enrolled\", function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"Has learningPathId\", function () {",
+                  "  pm.expect(body).to.have.property(\"learningPathId\");",
+                  "});",
+                  "pm.test(\"Has status\", function () {",
+                  "  pm.expect(body).to.have.property(\"status\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"learningPathId\": \"{{learning_path_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_url}}/learning-paths/enroll",
+              "host": ["{{auth_url}}"],
+              "path": ["learning-paths", "enroll"]
+            }
+          }
+        },
+        {
+          "name": "US-15: User lists their enrolled paths",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"Response is array\", function () {",
+                  "  pm.expect(body).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{auth_url}}/learning-paths/me",
+              "host": ["{{auth_url}}"],
+              "path": ["learning-paths", "me"]
+            }
+          }
+        },
+        {
+          "name": "US-16: User updates enrollment progress",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"Progress updated to 50%\", function () {",
+                  "  pm.expect(body.progressPercent).to.eql(50);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"learningPathId\": \"{{learning_path_id}}\",\n  \"progressPercent\": 50,\n  \"status\": \"in_progress\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_url}}/learning-paths/progress",
+              "host": ["{{auth_url}}"],
+              "path": ["learning-paths", "progress"]
+            }
+          }
+        },
+        {
+          "name": "US-17: User toggles enrollment active status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"Response has isActive\", function () {",
+                  "  pm.expect(body).to.have.property(\"isActive\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"learningPathId\": \"{{learning_path_id}}\",\n  \"isActive\": false\n}"
+            },
+            "url": {
+              "raw": "{{auth_url}}/learning-paths/enrollment",
+              "host": ["{{auth_url}}"],
+              "path": ["learning-paths", "enrollment"]
+            }
+          }
+        },
+        {
+          "name": "US-18: User sets enrollment active status (upsert)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"Response has isActive\", function () {",
+                  "  pm.expect(body).to.have.property(\"isActive\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"learningPathId\": \"{{learning_path_id}}\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{auth_url}}/learning-paths/enrollment",
+              "host": ["{{auth_url}}"],
+              "path": ["learning-paths", "enrollment"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "RF5 — Knowledge Base Access and Interaction",
+      "item": [
+        {
+          "name": "US-19: User reads content for an existing node",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"Response has nodeId\", function () {",
+                  "  pm.expect(body).to.have.property(\"nodeId\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{content_url}}/content/nodes/{{nodeId}}",
+              "host": ["{{content_url}}"],
+              "path": ["content", "nodes", "{{nodeId}}"]
+            }
+          }
+        },
+        {
+          "name": "US-20: User requests content for a non-existent node",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 404 — Not Found\", function () {",
+                  "  pm.response.to.have.status(404);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{content_url}}/content/nodes/INVALID",
+              "host": ["{{content_url}}"],
+              "path": ["content", "nodes", "INVALID"]
+            }
+          }
+        },
+        {
+          "name": "US-21: User validates content block structure",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"Has blocks array\", function () {",
+                  "  pm.expect(body).to.have.property(\"blocks\");",
+                  "});",
+                  "pm.test(\"Blocks is non-empty\", function () {",
+                  "  pm.expect(body.blocks.length).to.be.greaterThan(0);",
+                  "});",
+                  "pm.test(\"First block has type\", function () {",
+                  "  pm.expect(body.blocks[0]).to.have.property(\"type\");",
+                  "});",
+                  "pm.test(\"First block has order\", function () {",
+                  "  pm.expect(body.blocks[0]).to.have.property(\"order\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{content_url}}/content/nodes/{{nodeId}}",
+              "host": ["{{content_url}}"],
+              "path": ["content", "nodes", "{{nodeId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "RF6 — Formative and Summative Assessments",
+      "item": [
+        {
+          "name": "US-22: User lists all assessments",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"Response is array\", function () {",
+                  "  pm.expect(body).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "console.log(\"Using hardcoded assessment_id:\", pm.collectionVariables.get(\"assessment_id\"));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{content_url}}/content/assessments",
+              "host": ["{{content_url}}"],
+              "path": ["content", "assessments"]
+            }
+          }
+        },
+        {
+          "name": "US-23: User views an assessment with its questions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"Has questions array\", function () {",
+                  "  pm.expect(body).to.have.property(\"questions\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{content_url}}/content/assessments/{{assessment_id}}",
+              "host": ["{{content_url}}"],
+              "path": ["content", "assessments", "{{assessment_id}}"]
+            }
+          }
+        },
+        {
+          "name": "US-24: User lists questions for an assessment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"Response is array\", function () {",
+                  "  pm.expect(body).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{content_url}}/content/assessments/{{assessment_id}}/questions",
+              "host": ["{{content_url}}"],
+              "path": ["content", "assessments", "{{assessment_id}}", "questions"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "RF7 — Markers, Notes and Summaries",
+      "item": [
+        {
+          "name": "US-25: User creates/upserts a note for a node",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"Note has title\", function () {",
+                  "  pm.expect(body).to.have.property(\"title\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"My Study Note\",\n  \"markdownContent\": \"# Derivatives\\n\\nThe derivative measures the rate of change of a function.\",\n  \"tags\": [\"math\", \"calculus\"]\n}"
+            },
+            "url": {
+              "raw": "{{content_url}}/content/notes/{{nodeId}}",
+              "host": ["{{content_url}}"],
+              "path": ["content", "notes", "{{nodeId}}"]
+            }
+          }
+        },
+        {
+          "name": "US-26: User retrieves their note",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"Note belongs to current user\", function () {",
+                  "  pm.expect(body.userId).to.eql(pm.collectionVariables.get(\"userId\"));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{content_url}}/content/notes/{{nodeId}}",
+              "host": ["{{content_url}}"],
+              "path": ["content", "notes", "{{nodeId}}"]
+            }
+          }
+        },
+        {
+          "name": "US-27: User deletes their note",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"Delete confirmed\", function () {",
+                  "  pm.expect(body.message).to.eql(\"Note deleted successfully\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{content_url}}/content/notes/{{nodeId}}",
+              "host": ["{{content_url}}"],
+              "path": ["content", "notes", "{{nodeId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "RF8 — Semantic Search and Filters",
+      "item": [
+        {
+          "name": "US-28: User searches concepts filtered by track",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"Response is array\", function () {",
+                  "  pm.expect(body).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "if (body.length > 0) {",
+                  "  pm.test(\"All concepts match the requested track\", function () {",
+                  "    body.forEach(function (c) {",
+                  "      pm.expect(c.track).to.eql(pm.collectionVariables.get(\"track_name\"));",
+                  "    });",
+                  "  });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{knowledge_url}}/concepts?track={{track_name}}",
+              "host": ["{{knowledge_url}}"],
+              "path": ["concepts"],
+              "query": [
+                { "key": "track", "value": "{{track_name}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "US-29: User searches concepts filtered by subtrack",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"Response is array\", function () {",
+                  "  pm.expect(body).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{knowledge_url}}/concepts?subtrack={{subtrack_name}}",
+              "host": ["{{knowledge_url}}"],
+              "path": ["concepts"],
+              "query": [
+                { "key": "subtrack", "value": "{{subtrack_name}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "US-30: User filters knowledge graph by track",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"Has nodes\", function () {",
+                  "  pm.expect(body).to.have.property(\"nodes\");",
+                  "});",
+                  "pm.test(\"Has edges\", function () {",
+                  "  pm.expect(body).to.have.property(\"edges\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{knowledge_url}}/concepts/graph/track/{{track_name}}",
+              "host": ["{{knowledge_url}}"],
+              "path": ["concepts", "graph", "track", "{{track_name}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cleanup",
+      "item": [
+        {
+          "name": "US-31: Delete test user account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 — Account deleted\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var body = pm.response.json();",
+                  "pm.test(\"Delete confirmed\", function () {",
+                  "  pm.expect(body.message).to.eql(\"User deleted successfully\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{auth_url}}/users/me",
+              "host": ["{{auth_url}}"],
+              "path": ["users", "me"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

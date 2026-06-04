@@ -76,11 +76,20 @@ export async function update(id, data) {
 
 // Soft-deletes a user by setting deletedAt and deactivating the account
 export async function softDelete(id) {
-  const updated = await prisma.user.update({
+
+  // delete user
+  const deleted = await prisma.user.delete({
     where: { id },
-    data: { deletedAt: new Date(), isActive: false },
-  });
-  return toUserEntity(updated);
+  })
+
+  console.log(deleted)
+
+  // const updated = await prisma.user.update({
+  //   where: { id },
+  //   data: { deletedAt: new Date(), isActive: false },
+  // });
+
+  return toUserEntity(deleted);
 }
 
 // Creates a user profile record for a given user
