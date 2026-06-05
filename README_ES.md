@@ -1,20 +1,19 @@
-# API Endpoints Reference
+# Referencia de Endpoints de la API
 
-## Installation
+## Instalación
 
 ```bash
-# Install all workspace dependencies
+# Instalar todas las dependencias del workspace
 pnpm install
 
-# Generate Prisma client (auth service)
+# Generar el cliente de Prisma (servicio auth)
 pnpm db:generate
 
-# Run database migrations (auth service — PostgreSQL)
+# Ejecutar migraciones de base de datos (servicio auth — PostgreSQL)
 pnpm db:push
 
-# Seed all services
+# Sembrar todos los servicios
 
-```bash
 # Auth (PostgreSQL + Prisma)
 cd packages/auth && node prisma/seed.js
 
@@ -24,31 +23,30 @@ cd packages/knowledge && node scripts/seed.js
 # Content (MongoDB)
 cd packages/content && node scripts/seed.js
 ```
-```
 
-Then start the services (each in its own terminal, or use the parallel dev script):
+Luego iniciar los servicios (cada uno en su propia terminal, o usar el script de desarrollo paralelo):
 
 ```bash
-# All three at once
+# Los tres a la vez
 pnpm dev
 
-# Or individually
-cd packages/auth      && node server.js    # port 8080
-cd packages/knowledge && node server.js    # port 8081
-cd packages/content   && node server.js    # port 8082
+# O individualmente
+cd packages/auth      && node server.js    # puerto 8080
+cd packages/knowledge && node server.js    # puerto 8081
+cd packages/content   && node server.js    # puerto 8082
 ```
 
 ---
 
-## Auth Service — `http://localhost:8080/api/v1`
+## Servicio Auth — `http://localhost:8080/api/v1`
 
 ### `POST /auth/register`
 
-Create a new student account.
+Crear una nueva cuenta de estudiante.
 
-**Auth:** none
+**Autenticación:** ninguna
 
-**Request body:**
+**Cuerpo de la solicitud:**
 
 ```json
 {
@@ -59,7 +57,7 @@ Create a new student account.
 }
 ```
 
-**Response `201 Created`:**
+**Respuesta `201 Created`:**
 
 ```json
 {
@@ -73,22 +71,22 @@ Create a new student account.
 }
 ```
 
-**Errors:**
+**Errores:**
 
-| Status | Code | When |
-|--------|------|------|
-| `400` | `VALIDATION_ERROR` | Missing or invalid email/password |
-| `409` | `CONFLICT` | Email already registered |
+| Estado | Código | Cuándo |
+|--------|--------|--------|
+| `400` | `VALIDATION_ERROR` | Falta el email/contraseña o son inválidos |
+| `409` | `CONFLICT` | El email ya está registrado |
 
 ---
 
 ### `POST /auth/login`
 
-Authenticate with email and password.
+Autenticarse con correo electrónico y contraseña.
 
-**Auth:** none
+**Autenticación:** ninguna
 
-**Request body:**
+**Cuerpo de la solicitud:**
 
 ```json
 {
@@ -97,7 +95,7 @@ Authenticate with email and password.
 }
 ```
 
-**Response `200 OK`:**
+**Respuesta `200 OK`:**
 
 ```json
 {
@@ -111,22 +109,22 @@ Authenticate with email and password.
 }
 ```
 
-**Errors:**
+**Errores:**
 
-| Status | Code | When |
-|--------|------|------|
-| `401` | `UNAUTHORIZED` | Invalid email or password |
-| `403` | `FORBIDDEN` | Account is inactive |
+| Estado | Código | Cuándo |
+|--------|--------|--------|
+| `401` | `UNAUTHORIZED` | Email o contraseña inválidos |
+| `403` | `FORBIDDEN` | La cuenta está inactiva |
 
 ---
 
 ### `GET /users/me`
 
-Retrieve the authenticated user’s full profile, including roles.
+Obtener el perfil completo del usuario autenticado, incluidos sus roles.
 
-**Auth:** Bearer token
+**Autenticación:** Bearer token
 
-**Response `200 OK`:**
+**Respuesta `200 OK`:**
 
 ```json
 {
@@ -154,11 +152,11 @@ Retrieve the authenticated user’s full profile, including roles.
 
 ### `PATCH /users/me`
 
-Update the authenticated user’s profile fields.
+Actualizar los campos del perfil del usuario autenticado.
 
-**Auth:** Bearer token
+**Autenticación:** Bearer token
 
-**Request body (all optional):**
+**Cuerpo de la solicitud (todos opcionales):**
 
 ```json
 {
@@ -171,7 +169,7 @@ Update the authenticated user’s profile fields.
 }
 ```
 
-**Response `200 OK`:** Returns the updated profile object:
+**Respuesta `200 OK`:** Devuelve el objeto de perfil actualizado:
 
 ```json
 {
@@ -189,11 +187,11 @@ Update the authenticated user’s profile fields.
 
 ### `PATCH /users/me/account`
 
-Update the account credentials (email and/or password).
+Actualizar las credenciales de la cuenta (email y/o contraseña).
 
-**Auth:** Bearer token
+**Autenticación:** Bearer token
 
-**Request body:**
+**Cuerpo de la solicitud:**
 
 ```json
 {
@@ -203,9 +201,9 @@ Update the account credentials (email and/or password).
 }
 ```
 
-Both `newEmail` and `newPassword` are optional (at least one must be provided).
+Tanto `newEmail` como `newPassword` son opcionales (al menos uno debe ser proporcionado).
 
-**Response `200 OK` (password only changed):**
+**Respuesta `200 OK` (solo cambió la contraseña):**
 
 ```json
 {
@@ -213,7 +211,7 @@ Both `newEmail` and `newPassword` are optional (at least one must be provided).
 }
 ```
 
-**Response `200 OK` (email changed — new JWT returned):**
+**Respuesta `200 OK` (cambió el email — se devuelve un nuevo JWT):**
 
 ```json
 {
@@ -223,22 +221,22 @@ Both `newEmail` and `newPassword` are optional (at least one must be provided).
 }
 ```
 
-**Errors:**
+**Errores:**
 
-| Status | Code | When |
-|--------|------|------|
-| `403` | `FORBIDDEN` | Current password is incorrect |
-| `409` | `CONFLICT` | New email is already in use |
+| Estado | Código | Cuándo |
+|--------|--------|--------|
+| `403` | `FORBIDDEN` | La contraseña actual es incorrecta |
+| `409` | `CONFLICT` | El nuevo email ya está en uso |
 
 ---
 
 ### `DELETE /users/me`
 
-Soft-delete the authenticated user’s account.
+Eliminar la cuenta del usuario autenticado.
 
-**Auth:** Bearer token
+**Autenticación:** Bearer token
 
-**Response `200 OK`:**
+**Respuesta `200 OK`:**
 
 ```json
 {
@@ -250,11 +248,11 @@ Soft-delete the authenticated user’s account.
 
 ### `GET /learning-paths`
 
-List all available learning paths.
+Listar todas las rutas de aprendizaje disponibles.
 
-**Auth:** Bearer token
+**Autenticación:** Bearer token
 
-**Response `200 OK`:**
+**Respuesta `200 OK`:**
 
 ```json
 [
@@ -277,11 +275,11 @@ List all available learning paths.
 
 ### `POST /learning-paths/enroll`
 
-Enroll the authenticated user in a learning path.
+Inscribir al usuario autenticado en una ruta de aprendizaje.
 
-**Auth:** Bearer token
+**Autenticación:** Bearer token
 
-**Request body:**
+**Cuerpo de la solicitud:**
 
 ```json
 {
@@ -289,7 +287,7 @@ Enroll the authenticated user in a learning path.
 }
 ```
 
-**Response `201 Created`:**
+**Respuesta `201 Created`:**
 
 ```json
 {
@@ -303,22 +301,22 @@ Enroll the authenticated user in a learning path.
 }
 ```
 
-**Errors:**
+**Errores:**
 
-| Status | Code | When |
-|--------|------|------|
-| `404` | `NOT_FOUND` | Learning path or user not found |
-| `409` | `CONFLICT` | Already enrolled |
+| Estado | Código | Cuándo |
+|--------|--------|--------|
+| `404` | `NOT_FOUND` | Ruta de aprendizaje o usuario no encontrado |
+| `409` | `CONFLICT` | Ya está inscrito |
 
 ---
 
 ### `GET /learning-paths/me`
 
-List the authenticated user’s enrolled learning paths with progress.
+Listar las rutas de aprendizaje en las que el usuario autenticado está inscrito, con su progreso.
 
-**Auth:** Bearer token
+**Autenticación:** Bearer token
 
-**Response `200 OK`:**
+**Respuesta `200 OK`:**
 
 ```json
 [
@@ -346,11 +344,11 @@ List the authenticated user’s enrolled learning paths with progress.
 
 ### `PATCH /learning-paths/progress`
 
-Update the progress and/or status of an enrollment.
+Actualizar el progreso y/o el estado de una inscripción.
 
-**Auth:** Bearer token
+**Autenticación:** Bearer token
 
-**Request body:**
+**Cuerpo de la solicitud:**
 
 ```json
 {
@@ -360,9 +358,9 @@ Update the progress and/or status of an enrollment.
 }
 ```
 
-`progressPercent` and `status` are optional. Setting `progressPercent >= 100` auto-completes the enrollment.
+`progressPercent` y `status` son opcionales. Establecer `progressPercent >= 100` completa automáticamente la inscripción.
 
-**Response `200 OK`:**
+**Respuesta `200 OK`:**
 
 ```json
 {
@@ -376,22 +374,22 @@ Update the progress and/or status of an enrollment.
 }
 ```
 
-**Errors:**
+**Errores:**
 
-| Status | Code | When |
-|--------|------|------|
-| `404` | `NOT_FOUND` | Enrollment not found |
-| `409` | `CONFLICT` | Path already completed |
+| Estado | Código | Cuándo |
+|--------|--------|--------|
+| `404` | `NOT_FOUND` | Inscripción no encontrada |
+| `409` | `CONFLICT` | La ruta ya fue completada |
 
 ---
 
 ### `PATCH /learning-paths/enrollment`
 
-Toggle the active status of an existing enrollment.
+Cambiar el estado activo de una inscripción existente.
 
-**Auth:** Bearer token
+**Autenticación:** Bearer token
 
-**Request body:**
+**Cuerpo de la solicitud:**
 
 ```json
 {
@@ -400,7 +398,7 @@ Toggle the active status of an existing enrollment.
 }
 ```
 
-**Response `200 OK`:**
+**Respuesta `200 OK`:**
 
 ```json
 {
@@ -416,11 +414,11 @@ Toggle the active status of an existing enrollment.
 
 ### `PUT /learning-paths/enrollment`
 
-Create or update enrollment active status (upsert). If no enrollment exists, one is created.
+Crear o actualizar el estado activo de una inscripción (upsert). Si no existe una inscripción, se crea una nueva.
 
-**Auth:** Bearer token
+**Autenticación:** Bearer token
 
-**Request body:**
+**Cuerpo de la solicitud:**
 
 ```json
 {
@@ -429,7 +427,7 @@ Create or update enrollment active status (upsert). If no enrollment exists, one
 }
 ```
 
-**Response `200 OK`:**
+**Respuesta `200 OK`:**
 
 ```json
 {
@@ -444,25 +442,25 @@ Create or update enrollment active status (upsert). If no enrollment exists, one
 
 ---
 
-## Knowledge Service — `http://localhost:8081/api/v1`
+## Servicio Knowledge — `http://localhost:8081/api/v1`
 
 ### `GET /concepts`
 
-List all concepts, optionally filtered by track and/or subtrack.
+Listar todos los conceptos, opcionalmente filtrados por track y/o subtrack.
 
-**Auth:** Bearer token  
-**Permission:** `learning-path.read`
+**Autenticación:** Bearer token  
+**Permiso:** `learning-path.read`
 
-**Query parameters (all optional):**
+**Parámetros de consulta (todos opcionales):**
 
-| Param | Example | Description |
-|-------|---------|-------------|
-| `track` | `Mathematics` | Filter by track name |
-| `subtrack` | `Core Algebraic Spine` | Filter by subtrack name |
+| Parámetro | Ejemplo | Descripción |
+|-----------|---------|-------------|
+| `track` | `Mathematics` | Filtrar por nombre de track |
+| `subtrack` | `Core Algebraic Spine` | Filtrar por nombre de subtrack |
 
-**Request:** `GET /concepts?track=Mathematics`
+**Solicitud:** `GET /concepts?track=Mathematics`
 
-**Response `200 OK`:**
+**Respuesta `200 OK`:**
 
 ```json
 [
@@ -489,14 +487,14 @@ List all concepts, optionally filtered by track and/or subtrack.
 
 ### `GET /concepts/:id`
 
-Get a single concept with its prerequisites, dependents, and related concepts.
+Obtener un solo concepto con sus prerrequisitos, dependientes y conceptos relacionados.
 
-**Auth:** Bearer token  
-**Permission:** `learning-path.read`
+**Autenticación:** Bearer token  
+**Permiso:** `learning-path.read`
 
-**Request:** `GET /concepts/CN10`
+**Solicitud:** `GET /concepts/CN10`
 
-**Response `200 OK`:**
+**Respuesta `200 OK`:**
 
 ```json
 {
@@ -519,24 +517,24 @@ Get a single concept with its prerequisites, dependents, and related concepts.
 }
 ```
 
-**Errors:**
+**Errores:**
 
-| Status | Code | When |
-|--------|------|------|
-| `404` | `NOT_FOUND` | Concept does not exist |
+| Estado | Código | Cuándo |
+|--------|--------|--------|
+| `404` | `NOT_FOUND` | El concepto no existe |
 
 ---
 
 ### `GET /concepts/:id/prerequisites`
 
-List the prerequisite concepts (incoming `REQUIRES_TO` relationships).
+Listar los conceptos prerrequisito (relaciones `REQUIRES_TO` entrantes).
 
-**Auth:** Bearer token  
-**Permission:** `learning-path.read`
+**Autenticación:** Bearer token  
+**Permiso:** `learning-path.read`
 
-**Request:** `GET /concepts/CN10/prerequisites`
+**Solicitud:** `GET /concepts/CN10/prerequisites`
 
-**Response `200 OK`:**
+**Respuesta `200 OK`:**
 
 ```json
 [
@@ -549,14 +547,14 @@ List the prerequisite concepts (incoming `REQUIRES_TO` relationships).
 
 ### `GET /concepts/:id/dependents`
 
-List the dependent concepts (outgoing `REQUIRES_TO` relationships).
+Listar los conceptos dependientes (relaciones `REQUIRES_TO` salientes).
 
-**Auth:** Bearer token  
-**Permission:** `learning-path.read`
+**Autenticación:** Bearer token  
+**Permiso:** `learning-path.read`
 
-**Request:** `GET /concepts/CN10/dependents`
+**Solicitud:** `GET /concepts/CN10/dependents`
 
-**Response `200 OK`:**
+**Respuesta `200 OK`:**
 
 ```json
 [
@@ -568,14 +566,14 @@ List the dependent concepts (outgoing `REQUIRES_TO` relationships).
 
 ### `GET /concepts/:id/related`
 
-List the related concepts (bidirectional `RELATES_TO` relationships).
+Listar los conceptos relacionados (relaciones bidireccionales `RELATES_TO`).
 
-**Auth:** Bearer token  
-**Permission:** `learning-path.read`
+**Autenticación:** Bearer token  
+**Permiso:** `learning-path.read`
 
-**Request:** `GET /concepts/CN10/related`
+**Solicitud:** `GET /concepts/CN10/related`
 
-**Response `200 OK`:**
+**Respuesta `200 OK`:**
 
 ```json
 [
@@ -587,11 +585,11 @@ List the related concepts (bidirectional `RELATES_TO` relationships).
 
 ### `GET /concepts/graph`
 
-Return the entire knowledge graph as nodes and edges.
+Devolver el grafo de conocimiento completo como nodos y aristas.
 
-**Auth:** Bearer token
+**Autenticación:** Bearer token
 
-**Response `200 OK`:**
+**Respuesta `200 OK`:**
 
 ```json
 {
@@ -611,18 +609,18 @@ Return the entire knowledge graph as nodes and edges.
 
 ### `GET /concepts/graph/track/:track`
 
-Return the knowledge graph filtered to a specific track.
+Devolver el grafo de conocimiento filtrado por un track específico.
 
-**Auth:** Bearer token
+**Autenticación:** Bearer token
 
-**Request:** `GET /concepts/graph/track/Mathematics`
+**Solicitud:** `GET /concepts/graph/track/Mathematics`
 
-**Response `200 OK`:**
+**Respuesta `200 OK`:**
 
 ```json
 {
-  "nodes": [ /* only Mathematics concepts */ ],
-  "edges": [ /* only edges between Mathematics concepts */ ]
+  "nodes": [ /* solo conceptos de Mathematics */ ],
+  "edges": [ /* solo aristas entre conceptos de Mathematics */ ]
 }
 ```
 
@@ -630,13 +628,13 @@ Return the knowledge graph filtered to a specific track.
 
 ### `GET /concepts/graph/path/:from/:to`
 
-Find the shortest `REQUIRES_TO` path between two concepts.
+Encontrar la ruta más corta (`REQUIRES_TO`) entre dos conceptos.
 
-**Auth:** Bearer token
+**Autenticación:** Bearer token
 
-**Request:** `GET /concepts/graph/path/CN01/CN10`
+**Solicitud:** `GET /concepts/graph/path/CN01/CN10`
 
-**Response `200 OK`:**
+**Respuesta `200 OK`:**
 
 ```json
 {
@@ -658,26 +656,26 @@ Find the shortest `REQUIRES_TO` path between two concepts.
 }
 ```
 
-**Errors:**
+**Errores:**
 
-| Status | Code | When |
-|--------|------|------|
-| `404` | `NOT_FOUND` | No path exists between the specified concepts |
+| Estado | Código | Cuándo |
+|--------|--------|--------|
+| `404` | `NOT_FOUND` | No existe una ruta entre los conceptos especificados |
 
 ---
 
-## Content Service — `http://localhost:8082/api/v1`
+## Servicio Content — `http://localhost:8082/api/v1`
 
 ### `GET /content/nodes/:nodeId`
 
-Retrieve the content blocks for a knowledge node.
+Obtener los bloques de contenido de un nodo de conocimiento.
 
-**Auth:** Bearer token  
-**Permission:** `content.read`
+**Autenticación:** Bearer token  
+**Permiso:** `content.read`
 
-**Request:** `GET /content/nodes/CN10`
+**Solicitud:** `GET /content/nodes/CN10`
 
-**Response `200 OK`:**
+**Respuesta `200 OK`:**
 
 ```json
 {
@@ -706,22 +704,22 @@ Retrieve the content blocks for a knowledge node.
 }
 ```
 
-**Errors:**
+**Errores:**
 
-| Status | Code | When |
-|--------|------|------|
-| `404` | `NOT_FOUND` | No content exists for this node |
+| Estado | Código | Cuándo |
+|--------|--------|--------|
+| `404` | `NOT_FOUND` | No existe contenido para este nodo |
 
 ---
 
 ### `PUT /content/notes/:nodeId`
 
-Create or update (upsert) the authenticated user’s personal note for a knowledge node.
+Crear o actualizar (upsert) la nota personal del usuario autenticado para un nodo de conocimiento.
 
-**Auth:** Bearer token  
-**Permission:** `notes.write`
+**Autenticación:** Bearer token  
+**Permiso:** `notes.write`
 
-**Request body:**
+**Cuerpo de la solicitud:**
 
 ```json
 {
@@ -731,7 +729,7 @@ Create or update (upsert) the authenticated user’s personal note for a knowled
 }
 ```
 
-**Response `200 OK`:**
+**Respuesta `200 OK`:**
 
 ```json
 {
@@ -748,14 +746,14 @@ Create or update (upsert) the authenticated user’s personal note for a knowled
 
 ### `GET /content/notes/:nodeId`
 
-Retrieve the authenticated user’s note for a knowledge node.
+Obtener la nota del usuario autenticado para un nodo de conocimiento.
 
-**Auth:** Bearer token  
-**Permission:** `notes.read`
+**Autenticación:** Bearer token  
+**Permiso:** `notes.read`
 
-**Request:** `GET /content/notes/CN10`
+**Solicitud:** `GET /content/notes/CN10`
 
-**Response `200 OK`:**
+**Respuesta `200 OK`:**
 
 ```json
 {
@@ -768,24 +766,24 @@ Retrieve the authenticated user’s note for a knowledge node.
 }
 ```
 
-**Errors:**
+**Errores:**
 
-| Status | Code | When |
-|--------|------|------|
-| `404` | `NOT_FOUND` | No note exists for this user and node |
+| Estado | Código | Cuándo |
+|--------|--------|--------|
+| `404` | `NOT_FOUND` | No existe una nota para este usuario y nodo |
 
 ---
 
 ### `DELETE /content/notes/:nodeId`
 
-Delete the authenticated user’s note for a knowledge node.
+Eliminar la nota del usuario autenticado para un nodo de conocimiento.
 
-**Auth:** Bearer token  
-**Permission:** `notes.write`
+**Autenticación:** Bearer token  
+**Permiso:** `notes.write`
 
-**Request:** `DELETE /content/notes/CN10`
+**Solicitud:** `DELETE /content/notes/CN10`
 
-**Response `200 OK`:**
+**Respuesta `200 OK`:**
 
 ```json
 {
@@ -793,22 +791,22 @@ Delete the authenticated user’s note for a knowledge node.
 }
 ```
 
-**Errors:**
+**Errores:**
 
-| Status | Code | When |
-|--------|------|------|
-| `404` | `NOT_FOUND` | No note exists for this user and node |
+| Estado | Código | Cuándo |
+|--------|--------|--------|
+| `404` | `NOT_FOUND` | No existe una nota para este usuario y nodo |
 
 ---
 
 ### `GET /content/assessments`
 
-List all assessments.
+Listar todas las evaluaciones.
 
-**Auth:** Bearer token  
-**Permission:** `assessment.read`
+**Autenticación:** Bearer token  
+**Permiso:** `assessment.read`
 
-**Response `200 OK`:**
+**Respuesta `200 OK`:**
 
 ```json
 [
@@ -830,14 +828,14 @@ List all assessments.
 
 ### `GET /content/assessments/:id`
 
-Get a single assessment with its questions embedded.
+Obtener una evaluación individual con sus preguntas incorporadas.
 
-**Auth:** Bearer token  
-**Permission:** `assessment.read`
+**Autenticación:** Bearer token  
+**Permiso:** `assessment.read`
 
-**Request:** `GET /content/assessments/eval_math_algebra_diag`
+**Solicitud:** `GET /content/assessments/eval_math_algebra_diag`
 
-**Response `200 OK`:**
+**Respuesta `200 OK`:**
 
 ```json
 {
@@ -870,24 +868,24 @@ Get a single assessment with its questions embedded.
 }
 ```
 
-**Errors:**
+**Errores:**
 
-| Status | Code | When |
-|--------|------|------|
-| `404` | `NOT_FOUND` | Assessment does not exist |
+| Estado | Código | Cuándo |
+|--------|--------|--------|
+| `404` | `NOT_FOUND` | La evaluación no existe |
 
 ---
 
 ### `GET /content/assessments/:id/questions`
 
-List all questions belonging to an assessment.
+Listar todas las preguntas pertenecientes a una evaluación.
 
-**Auth:** Bearer token  
-**Permission:** `assessment.read`
+**Autenticación:** Bearer token  
+**Permiso:** `assessment.read`
 
-**Request:** `GET /content/assessments/eval_math_algebra_diag/questions`
+**Solicitud:** `GET /content/assessments/eval_math_algebra_diag/questions`
 
-**Response `200 OK`:**
+**Respuesta `200 OK`:**
 
 ```json
 [
@@ -910,10 +908,10 @@ List all questions belonging to an assessment.
 
 ---
 
-## Student Permissions Reference
+## Referencia de Permisos del Estudiante
 
-| Permission slug | Endpoints |
-|-----------------|-----------|
+| Permiso | Endpoints |
+|---------|-----------|
 | `user.read` | `GET /users/me` |
 | `learning-path.read` | `GET /concepts`, `GET /concepts/:id`, `GET /concepts/:id/prerequisites`, `GET /concepts/:id/dependents`, `GET /concepts/:id/related` |
 | `learning-path.enroll` | `POST /learning-paths/enroll` |
@@ -923,4 +921,4 @@ List all questions belonging to an assessment.
 | `assessment.read` | `GET /content/assessments`, `GET /content/assessments/:id`, `GET /content/assessments/:id/questions` |
 | `assessment.attempt` | |
 
-Endpoints with only `authMiddleware` (no permission check) are available to every authenticated user: `GET /learning-paths`, `GET /learning-paths/me`, `PATCH /learning-paths/progress`, `PATCH /learning-paths/enrollment`, `PUT /learning-paths/enrollment`, `GET /concepts/graph`, `GET /concepts/graph/track/:track`, `GET /concepts/graph/path/:from/:to`.
+Los endpoints que solo usan `authMiddleware` (sin verificación de permiso) están disponibles para cualquier usuario autenticado: `GET /learning-paths`, `GET /learning-paths/me`, `PATCH /learning-paths/progress`, `PATCH /learning-paths/enrollment`, `PUT /learning-paths/enrollment`, `GET /concepts/graph`, `GET /concepts/graph/track/:track`, `GET /concepts/graph/path/:from/:to`.
