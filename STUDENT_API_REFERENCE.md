@@ -211,7 +211,158 @@ Permanently delete the authenticated user's account.
 
 ---
 
+## Learning Paths
+
+### GET /learning-paths
+
+List all available learning paths.
+
+**Full URL:** `http://localhost:8084/api/student/learning-paths`  
+**Auth required:** Yes — `Authorization: Bearer <token>`
+
+**Request body:** None
+
+**Success response (200):**
+```json
+[
+  {
+    "id": "<uuid>",
+    "code": "Math",
+    "title": "Mathematics Fundamentals",
+    "description": "Fundamental mathematics track covering arithmetic through calculus"
+  },
+  {
+    "id": "<uuid>",
+    "code": "Geometry",
+    "title": "Geometry and Trigonometry",
+    "description": "From foundational shapes to advanced trigonometry"
+  }
+]
+```
+
+---
+
+### GET /learning-paths/enrolled
+
+List the authenticated user's enrolled learning paths with progress.
+
+**Full URL:** `http://localhost:8084/api/student/learning-paths/enrolled`  
+**Auth required:** Yes — `Authorization: Bearer <token>`
+
+**Request body:** None
+
+**Success response (200):**
+```json
+[
+  {
+    "enrollment": {
+      "userId": "<uuid>",
+      "learningPathId": "<uuid>",
+      "isActive": true,
+      "startedAt": "2026-01-01T00:00:00.000Z",
+      "progressPercent": 50.00,
+      "completedAt": null,
+      "status": "in_progress"
+    },
+    "learningPath": {
+      "id": "<uuid>",
+      "code": "Math",
+      "title": "Mathematics Fundamentals",
+      "description": "Fundamental mathematics track"
+    }
+  }
+]
+```
+
+---
+
+### PUT /learning-paths
+
+Batch enroll or unenroll the authenticated user in learning paths.
+
+**Full URL:** `http://localhost:8084/api/student/learning-paths`  
+**Auth required:** Yes — `Authorization: Bearer <token>`
+
+**Request body:**
+```json
+{
+  "codes": ["Math", "Geometry"]
+}
+```
+
+**Success response (200):**
+```json
+{
+  "enrolledPaths": [
+    {
+      "code": "Math",
+      "title": "Mathematics Fundamentals",
+      "isActive": true,
+      "progress": 0
+    },
+    {
+      "code": "Geometry",
+      "title": "Geometry and Trigonometry",
+      "isActive": true,
+      "progress": 0
+    }
+  ]
+}
+```
+
+**Error response (400):**
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "codes must be a non-empty array"
+  }
+}
+```
+
+---
+
 ## Knowledge Graph
+
+### GET /concepts
+
+List all concepts, optionally filtered by track and/or subtrack.
+
+**Full URL:** `http://localhost:8084/api/student/concepts`  
+**Auth required:** Yes — `Authorization: Bearer <token>`
+
+**Query parameters (all optional):**
+
+| Param | Example | Description |
+|-------|---------|-------------|
+| `track` | `Mathematics` | Filter by track name |
+| `subtrack` | `Core Algebraic Spine` | Filter by subtrack name |
+
+**Request body:** None
+
+**Success response (200):**
+```json
+[
+  {
+    "id": "CN01",
+    "name": "Number Sense",
+    "description": "Foundational number operations",
+    "subtrack": "Core Algebraic Spine",
+    "track": "Mathematics",
+    "difficulty": 1
+  },
+  {
+    "id": "CN10",
+    "name": "Exponential, Logarithmic & Matrix Algebra",
+    "description": "Exponential modeling, properties of logarithms",
+    "subtrack": "Core Algebraic Spine",
+    "track": "Mathematics",
+    "difficulty": 9
+  }
+]
+```
+
+---
 
 ### GET /graph
 
