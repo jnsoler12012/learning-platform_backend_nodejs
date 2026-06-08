@@ -11,6 +11,8 @@
   },
   "scripts": {
     "dev": "pnpm --parallel --filter @platform/auth --filter @platform/knowledge --filter @platform/content --filter @platform/gateway dev",
+    "dev:exposed": "pnpm --parallel --filter @platform/auth --filter @platform/knowledge --filter @platform/content --filter @platform/gateway dev",
+    "dev:local": "HOST=127.0.0.1 pnpm --parallel --filter @platform/auth --filter @platform/knowledge --filter @platform/content --filter @platform/gateway dev",
     "dev:knowledge": "pnpm --filter @platform/knowledge dev",
     "dev:content": "pnpm --filter @platform/content dev",
     "start": "pnpm --filter @platform/auth start",
